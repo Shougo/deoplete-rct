@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 from .base import Base
-from deoplete.util import getlines
+from deoplete.util import getlines, debug
 
 class Source(Base):
     def __init__(self, vim):
@@ -18,15 +18,13 @@ class Source(Base):
         self.filetypes = ['ruby']
         self.mark = '[R]'
         self.rank = 500
-        self.min_pattern_length = 0
         self.executable_rct = self.vim.call('executable', 'rct-complete')
         self.encoding = self.vim.eval('&encoding')
+        self.input_pattern = r'\.[a-zA-Z0-9_?!]*'
 
     def get_complete_position(self, context):
-        m = re.search(r'(?<=\.)[a-zA-Z_?!]*', context['input'])
-        if m:
-            return m.start()
-        return -1
+        m = re.search('[a-zA-Z0-9_?!]*$', context['input'])
+        return m.start() if m else -1
 
     def gather_candidates(self, context):
         if not self.executable_rct:
@@ -37,7 +35,8 @@ class Source(Base):
             f.writelines(getlines(self.vim))
             f.flush()
             try:
-                words = [x.decode(self.encoding).split('\t') for x in
+                words = [x.decode(self.encoding).split('\t')
+                         for x in
                          subprocess.check_output(
                              ['rct-complete', '--completion-class-info',
                               '--dev', '--fork',
@@ -47,4 +46,5 @@ class Source(Base):
                               ]).splitlines()]
             except subprocess.CalledProcessError:
                 return []
-        return [{'word': x[0], 'menu': x[1]} for x in words]
+        return [{'word': x[0], 'menu': x[1] if len(x) > 1 else ''}
+                for x in words]
