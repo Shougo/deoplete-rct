@@ -5,6 +5,7 @@
 
 import re
 import subprocess
+from subprocess import PIPE
 import tempfile
 
 from .base import Base
@@ -31,20 +32,22 @@ class Source(Base):
             return []
 
         words = []
-        with tempfile.NamedTemporaryFile(mode='w') as f:
-            f.writelines(getlines(self.vim))
-            f.flush()
-            try:
-                words = [x.decode(self.encoding).split('\t')
-                         for x in
-                         subprocess.check_output(
-                             ['rct-complete', '--completion-class-info',
-                              '--dev', '--fork',
-                              '--line=' + str(context['position'][1]),
-                              '--column=' + str(context['complete_position']),
-                              f.name
-                              ]).splitlines()]
-            except subprocess.CalledProcessError:
-                return []
+        line = context['position'][1]
+        column = context['complete_position']
+        cmd = [
+                'rct-complete',
+                '--completion-class-info',
+                '--dev',
+                '--fork',
+                '--line=%s' % line,
+                '--column=%s' % column
+                ]
+        buf = '\n'.join(getlines(self.vim)).encode(self.encoding)
+        try:
+            rct_proc = subprocess.run(cmd, check=True, input=buf, stdout=PIPE)
+            output = rct_proc.stdout.splitlines()
+            words = [x.decode(self.encoding).split('\t') for x in output]
+        except subprocess.CalledProcessError:
+            return []
         return [{'word': x[0], 'menu': x[1] if len(x) > 1 else ''}
                 for x in words]
