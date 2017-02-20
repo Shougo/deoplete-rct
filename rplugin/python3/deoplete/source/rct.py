@@ -21,7 +21,7 @@ class Source(Base):
         self.rank = 500
         self.executable_rct = self.vim.call('executable', 'rct-complete')
         self.encoding = self.vim.eval('&encoding')
-        self.input_pattern = r'\.[a-zA-Z0-9_?!]*'
+        self.input_pattern = r'\.[a-zA-Z0-9_?!]*|[a-zA-Z]\w*::\w*'
 
     def get_complete_position(self, context):
         m = re.search('[a-zA-Z0-9_?!]*$', context['input'])
