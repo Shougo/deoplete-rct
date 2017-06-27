@@ -1,5 +1,7 @@
 # Ruby completion for deoplete using rcodetools
 
+Note: Python 3.5+ is needed.
+
 ## install
 
 * Install the latest deoplete.nvim
