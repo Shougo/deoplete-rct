@@ -1,8 +1,8 @@
-# Ruby completion for deoplete using rcodetools
+# Ruby Completion for deoplete using rcodetools
 
-Note: Python 3.5+ is needed.
+#### NOTE: Python (>= 3.4) is needed
 
-## install
+## Install
 
 * Install the latest deoplete.nvim
-* Make sure if you already have rcodetools(`rct-complete` command)
+* Make sure you already have rcodetools(`rct-complete` command)
