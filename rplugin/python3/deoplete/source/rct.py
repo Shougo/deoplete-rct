@@ -5,11 +5,9 @@
 
 import re
 import subprocess
-from subprocess import PIPE
-import tempfile
-
+from deoplete.util import getlines
 from .base import Base
-from deoplete.util import getlines, debug
+
 
 class Source(Base):
     def __init__(self, vim):
@@ -35,19 +33,18 @@ class Source(Base):
         line = context['position'][1]
         column = context['complete_position']
         cmd = [
-                'rct-complete',
-                '--completion-class-info',
-                '--dev',
-                '--fork',
-                '--line=%s' % line,
-                '--column=%s' % column
-                ]
+            'rct-complete', '--completion-class-info', '--dev', '--fork',
+            '--line=%s' % line,
+            '--column=%s' % column
+        ]
         buf = '\n'.join(getlines(self.vim)).encode(self.encoding)
         try:
-            rct_proc = subprocess.run(cmd, check=True, input=buf, stdout=PIPE)
-            output = rct_proc.stdout.splitlines()
+            output_string = subprocess.check_output(cmd, input=buf)
+            output = output_string.splitlines()
             words = [x.decode(self.encoding).split('\t') for x in output]
         except subprocess.CalledProcessError:
             return []
-        return [{'word': x[0], 'menu': x[1] if len(x) > 1 else ''}
-                for x in words]
+        return [{
+            'word': x[0],
+            'menu': x[1] if len(x) > 1 else ''
+        } for x in words]
