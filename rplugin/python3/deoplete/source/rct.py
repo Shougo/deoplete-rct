@@ -39,8 +39,7 @@ class Source(Base):
         ]
         buf = '\n'.join(getlines(self.vim)).encode(self.encoding)
         try:
-            output_string = subprocess.check_output(
-                cmd, input=buf, stdout=subprocess.PIPE)
+            output_string = subprocess.check_output(cmd, input=buf)
             output = output_string.splitlines()
             words = [x.decode(self.encoding).split('\t') for x in output]
         except subprocess.CalledProcessError:
